@@ -14,6 +14,8 @@ import com.razorpay.PaymentResultListener;
 
 import org.json.JSONObject;
 
+import java.text.NumberFormat;
+
 public class MainActivity extends AppCompatActivity implements PaymentResultListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -33,14 +35,20 @@ public class MainActivity extends AppCompatActivity implements PaymentResultList
         pay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                startPayment();
+                String amt = value.getText().toString();
+                if (!amt.isEmpty()&&!amt.equals("")){
+                    startPayment(amt);
+                    value.clearComposingText();
+                }
+                else{
+                    Toast.makeText(getApplicationContext(),"please enter amount",Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
 
-    private void startPayment() {
-        payAmount = Integer.parseInt(value.getText().toString());
+    private void startPayment(String amt) {
+        payAmount = Integer.parseInt(amt);
 
         Checkout checkout = new Checkout();
         checkout.setImage(R.mipmap.ic_launcher);
@@ -54,7 +62,9 @@ public class MainActivity extends AppCompatActivity implements PaymentResultList
             //You can omit the image option to fetch the image from dashboard
             //options.put("image", "https://rzp-mobile.s3.amazonaws.com/images/rzp.png");
             options.put("currency", "INR");
-            options.put("amount", "100");
+            options.put("amount", payAmount*100);
+
+          //  options.put("prefill", preFill);
 
             checkout.open(activity,options);
 
@@ -63,13 +73,14 @@ public class MainActivity extends AppCompatActivity implements PaymentResultList
         }catch (Exception e){
 
             Toast.makeText(activity, "Error in payment: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
+
         }
     }
 
     @Override
     public void onPaymentSuccess(String razorpayPaymentID) {
 
+        String s = razorpayPaymentID;
         try {
             Toast.makeText(this, "Payment Successful: " + razorpayPaymentID, Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
